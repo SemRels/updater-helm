@@ -4,22 +4,12 @@
 package main
 
 import (
-	"context"
 	"log"
-	"os"
 
-	grpcserver "github.com/SemRels/updater-helm/internal/grpc"
-	semrelplugin "github.com/SemRels/updater-helm/internal/plugin"
+	plugin "github.com/SemRels/updater-helm/internal/plugin"
 )
 
 func main() {
-	provider := semrelplugin.NewHelmUpdater("")
-	server := grpcserver.NewProviderServer(provider)
-
-	if _, err := server.Health(context.Background()); err != nil {
-		log.Printf("plugin health check failed: %v", err)
-		os.Exit(1)
-	}
-
-	log.Printf("%s plugin is ready", provider.Name())
+	helmPlugin := plugin.NewPlugin(plugin.PluginConfig{})
+	log.Printf("updater-helm plugin ready: updates Helm chart metadata and optionally packages charts (%T)", helmPlugin)
 }
