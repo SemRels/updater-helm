@@ -1,28 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
-// SPDX-FileCopyrightText: 2026 The plugin-template Authors
+// SPDX-FileCopyrightText: 2026 The semrel Authors
 
 package plugin
 
 import (
-	"context"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewProviderDefaultsName(t *testing.T) {
+func TestUpdateChartVersion(t *testing.T) {
 	t.Parallel()
 
-	provider := NewProvider("")
+	chartPath := filepath.Join(t.TempDir(), "Chart.yaml")
+	err := os.WriteFile(chartPath, []byte("apiVersion: v2\nname: demo\nversion: 0.1.0\nappVersion: \"0.1.0\"\n"), 0644)
+	require.NoError(t, err)
 
-	require.Equal(t, "replace-me", provider.Name())
-	require.NoError(t, provider.HealthCheck(context.Background()))
-}
+	err = UpdateChartVersion(chartPath, "1.2.3")
+	require.NoError(t, err)
 
-func TestNewProviderUsesProvidedName(t *testing.T) {
-	t.Parallel()
-
-	provider := NewProvider("provider-example")
-
-	require.Equal(t, "provider-example", provider.Name())
+	data, err := os.ReadFile(chartPath)
+	require.NoError(t, err)
+	require.Equal(t, "apiVersion: v2\nname: demo\nversion: 1.2.3\nappVersion: \"1.2.3\"\n", string(data))
 }
