@@ -20,13 +20,13 @@ func NewUpdater() *Updater {
 }
 
 // Update rewrites version and appVersion fields.
-func (u *Updater) Update(path, version, appVersion string, appVersionOnly bool) error {
+func (u *Updater) Update(path, version, appVersion string, appVersionOnly, updateAppVersion bool) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("read %s: %w", path, err)
 	}
 
-	updated, err := updateContent(string(data), version, appVersion, appVersionOnly)
+	updated, err := updateContent(string(data), version, appVersion, appVersionOnly, updateAppVersion)
 	if err != nil {
 		return err
 	}
@@ -37,8 +37,9 @@ func (u *Updater) Update(path, version, appVersion string, appVersionOnly bool) 
 	return nil
 }
 
-func updateContent(content, version, appVersion string, appVersionOnly bool) (string, error) {
-	if appVersion == "" {
+func updateContent(content, version, appVersion string, appVersionOnly, updateAppVersion bool) (string, error) {
+	shouldUpdateAppVersion := appVersionOnly || updateAppVersion
+	if shouldUpdateAppVersion && appVersion == "" {
 		appVersion = version
 	}
 
@@ -57,7 +58,9 @@ func updateContent(content, version, appVersion string, appVersionOnly bool) (st
 			versionUpdated = true
 		}
 		if strings.HasPrefix(trimmed, "appVersion:") {
-			line = indent + "appVersion: " + appVersion
+			if shouldUpdateAppVersion {
+				line = indent + "appVersion: " + appVersion
+			}
 			appUpdated = true
 		}
 
@@ -69,7 +72,7 @@ func updateContent(content, version, appVersion string, appVersionOnly bool) (st
 	if !appVersionOnly && !versionUpdated {
 		return "", fmt.Errorf("version field not found in Chart.yaml")
 	}
-	if !appUpdated {
+	if shouldUpdateAppVersion && !appUpdated {
 		lines = append(lines, "appVersion: "+appVersion)
 	}
 	return strings.Join(lines, "\n"), nil

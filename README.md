@@ -18,13 +18,21 @@ plugins:
     path: ~/.semrel/plugins/semrel-plugin-updater-helm
     env:
       SEMREL_PLUGIN_FILE: "charts/app/Chart.yaml"
+      SEMREL_PLUGIN_UPDATE_APP_VERSION: "true"
+      SEMREL_PLUGIN_APP_VERSION_PREFIX: "v"
 ```
 
 ## `SEMREL_PLUGIN_*` variables
 
 | Name | Required | Description | Default |
 | --- | --- | --- | --- |
-| `SEMREL_PLUGIN_FILE` | Optional | Path to the Helm chart file to update. | Chart.yaml |
+| `SEMREL_PLUGIN_FILE` | Optional | Path to the Helm chart file to update. | `Chart.yaml` |
+| `SEMREL_PLUGIN_UPDATE_APP_VERSION` | Optional | When `true`, update `appVersion` to match the resolved release version. | `false` |
+| `SEMREL_PLUGIN_APP_VERSION_ONLY` | Optional | When `true`, only update `appVersion` and leave `version` unchanged. | `false` |
+| `SEMREL_PLUGIN_APP_VERSION` | Optional | Explicit `appVersion` value to write instead of using the release version. | unset |
+| `SEMREL_PLUGIN_APP_VERSION_PREFIX` | Optional | String to prepend to the computed `appVersion` value. | empty |
+
+`SEMREL_PLUGIN_APP_VERSION_ONLY` also works with `SEMREL_PLUGIN_APP_VERSION` and `SEMREL_PLUGIN_APP_VERSION_PREFIX` when you want to update only the application version field.
 
 ## `SEMREL_*` release context used
 
@@ -36,7 +44,43 @@ plugins:
 
 ## Example behavior
 
-The plugin updates the chart version fields in `Chart.yaml` to match the new release version.
+By default, the plugin updates only `version` in `Chart.yaml`.
+
+To keep `appVersion` in sync with the release version as well:
+
+```yaml
+plugins:
+  - name: updater-helm
+    env:
+      SEMREL_PLUGIN_UPDATE_APP_VERSION: "true"
+```
+
+To prefix only `appVersion` while leaving `version` unchanged:
+
+```yaml
+plugins:
+  - name: updater-helm
+    env:
+      SEMREL_PLUGIN_UPDATE_APP_VERSION: "true"
+      SEMREL_PLUGIN_APP_VERSION_PREFIX: "v"
+```
+
+With a release version of `1.2.3`, this produces:
+
+```yaml
+version: 1.2.3
+appVersion: v1.2.3
+```
+
+To set a completely custom `appVersion`:
+
+```yaml
+plugins:
+  - name: updater-helm
+    env:
+      SEMREL_PLUGIN_APP_VERSION: "2.0.0"
+      SEMREL_PLUGIN_APP_VERSION_PREFIX: "v"
+```
 
 ## License
 

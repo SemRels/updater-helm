@@ -32,9 +32,19 @@ func run(stdout, stderr io.Writer, getenv func(string) string) int {
 		file = "Chart.yaml"
 	}
 	appOnly := strings.EqualFold(getenv("SEMREL_PLUGIN_APP_VERSION_ONLY"), "true")
+	updateAppVersion := strings.EqualFold(getenv("SEMREL_PLUGIN_UPDATE_APP_VERSION"), "true")
+	appVersionPrefix := getenv("SEMREL_PLUGIN_APP_VERSION_PREFIX")
 	appVersion := getenv("SEMREL_PLUGIN_APP_VERSION")
-	if appVersion != "" {
+	hasAppVersion := appVersion != ""
+	if hasAppVersion {
 		appVersion = strings.TrimPrefix(appVersion, "v")
+	}
+	shouldUpdateAppVersion := appOnly || updateAppVersion || hasAppVersion || appVersionPrefix != ""
+	if shouldUpdateAppVersion {
+		if appVersion == "" {
+			appVersion = version
+		}
+		appVersion = appVersionPrefix + appVersion
 	}
 
 	if getenv("SEMREL_DRY_RUN") == "true" {
@@ -42,7 +52,7 @@ func run(stdout, stderr io.Writer, getenv func(string) string) int {
 		return 0
 	}
 
-	if err := plugin.NewUpdater().Update(file, version, appVersion, appOnly); err != nil {
+	if err := plugin.NewUpdater().Update(file, version, appVersion, appOnly, shouldUpdateAppVersion); err != nil {
 		fmt.Fprintln(stderr, "updater-helm:", err)
 		return 1
 	}
