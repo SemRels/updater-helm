@@ -19,7 +19,7 @@ func main() {
 }
 
 func run(stdout, stderr io.Writer, getenv func(string) string) int {
-	fmt.Fprintf(stderr, "plugin_schema_version=%d\n", pluginSchemaVersion)
+	_, _ = fmt.Fprintf(stderr, "plugin_schema_version=%d\n", pluginSchemaVersion)
 	version := getenv("SEMREL_VERSION")
 	if version == "" {
 		version = getenv("SEMREL_NEXT_VERSION")
