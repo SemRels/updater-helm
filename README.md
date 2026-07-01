@@ -1,6 +1,6 @@
 # updater-helm
 
-[![Latest Release](https://img.shields.io/github/v/release/SemRels/updater-helm?label=version\&color=blue)](https://github.com/SemRels/updater-helm/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/SemRels/updater-helm?label=version&color=blue)](https://github.com/SemRels/updater-helm/releases/latest)
 
 Updates the version fields in a Helm chart.
 
