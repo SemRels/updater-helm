@@ -17,7 +17,11 @@ func TestUpdaterUpdateChart(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(dir)
+	t.Cleanup(func() {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Errorf("remove temporary directory: %v", err)
+		}
+	})
 
 	file := filepath.Join(dir, "Chart.yaml")
 	original := "apiVersion: v2\nname: demo\nversion: 1.2.3\nappVersion: 1.2.3\n"

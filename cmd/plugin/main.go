@@ -25,7 +25,7 @@ func run(stdout, stderr io.Writer, getenv func(string) string) int {
 		version = getenv("SEMREL_NEXT_VERSION")
 	}
 	if version == "" {
-		fmt.Fprintln(stderr, "updater-helm: SEMREL_VERSION is required")
+		_, _ = fmt.Fprintln(stderr, "updater-helm: SEMREL_VERSION is required")
 		return 1
 	}
 	version = strings.TrimPrefix(version, "v")
@@ -51,15 +51,15 @@ func run(stdout, stderr io.Writer, getenv func(string) string) int {
 	}
 
 	if getenv("SEMREL_DRY_RUN") == "true" {
-		fmt.Fprintf(stdout, "updater-helm: [dry-run] would update %s to version %s\n", file, version)
+		_, _ = fmt.Fprintf(stdout, "updater-helm: [dry-run] would update %s to version %s\n", file, version)
 		return 0
 	}
 
 	if err := plugin.NewUpdater().Update(file, version, appVersion, appOnly, shouldUpdateAppVersion); err != nil {
-		fmt.Fprintln(stderr, "updater-helm:", err)
+		_, _ = fmt.Fprintln(stderr, "updater-helm:", err)
 		return 1
 	}
 
-	fmt.Fprintf(stdout, "updater-helm: updated %s to version %s\n", file, version)
+	_, _ = fmt.Fprintf(stdout, "updater-helm: updated %s to version %s\n", file, version)
 	return 0
 }
