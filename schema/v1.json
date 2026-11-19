@@ -3,6 +3,7 @@
   "$id": "https://registry.semrel.io/schemas/plugins/updater-helm/v1.json",
   "title": "updater-helm plugin configuration",
   "description": "Schema v1 for the updater-helm semrel plugin. Configure via SEMREL_* environment variables.",
+  "x-semrel-dry-run": true,
   "type": "object",
   "properties": {
     "SEMREL_PLUGIN_FILE": {
