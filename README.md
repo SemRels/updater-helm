@@ -1,6 +1,10 @@
 # updater-helm
 
 [![Latest Release](https://img.shields.io/github/v/release/SemRels/updater-helm?label=version&color=blue)](https://github.com/SemRels/updater-helm/releases/latest)
+[![CI](https://github.com/SemRels/updater-helm/actions/workflows/ci.yml/badge.svg)](https://github.com/SemRels/updater-helm/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/SemRels/updater-helm)](LICENSE)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/SemRels/updater-helm/badge)](https://scorecard.dev/viewer/?uri=github.com/SemRels/updater-helm)
+[![REUSE status](https://api.reuse.software/badge/github.com/SemRels/updater-helm)](https://api.reuse.software/info/github.com/SemRels/updater-helm)
 
 Updates the version fields in a Helm chart.
 
@@ -26,7 +30,7 @@ Images are signed with [cosign](https://github.com/sigstore/cosign) and include 
 
 ```bash
 cosign verify ghcr.io/semrels/updater-helm:latest \
-  --certificate-identity-regexp 'https://github.com/SemRels/updater-helm/.github/workflows/release.yml.*' \
+  --certificate-identity-regexp 'https://github.com/SemRels/updater-helm/.github/workflows/container.yml.*' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
@@ -35,23 +39,25 @@ cosign verify ghcr.io/semrels/updater-helm:latest \
 
 ```yaml
 plugins:
-  - name: updater-helm
-    path: ~/.semrel/plugins/semrel-plugin-updater-helm
-    env:
-      SEMREL_PLUGIN_FILE: "charts/app/Chart.yaml"
-      SEMREL_PLUGIN_UPDATE_APP_VERSION: "true"
-      SEMREL_PLUGIN_APP_VERSION_PREFIX: "v"
+  - uses: "@semrel/updater-helm"
+    phase: pre-tag
+    args:
+      file: "charts/app/Chart.yaml"
+      update_app_version: "true"
+      app_version_prefix: "v"
 ```
 
-## `SEMREL_PLUGIN_*` variables
+## Options
 
-| Name | Required | Description | Default |
-| --- | --- | --- | --- |
-| `SEMREL_PLUGIN_FILE` | Optional | Path to the Helm chart file to update. | `Chart.yaml` |
-| `SEMREL_PLUGIN_UPDATE_APP_VERSION` | Optional | When `true`, update `appVersion` to match the resolved release version. | `false` |
-| `SEMREL_PLUGIN_APP_VERSION_ONLY` | Optional | When `true`, only update `appVersion` and leave `version` unchanged. | `false` |
-| `SEMREL_PLUGIN_APP_VERSION` | Optional | Explicit `appVersion` value to write instead of using the release version. | unset |
-| `SEMREL_PLUGIN_APP_VERSION_PREFIX` | Optional | String to prepend to the computed `appVersion` value. | empty |
+Every option can be set as an entry under `args` in `.semrel.yaml`. semrel passes each entry to the plugin as the environment variable shown in the table, so you can also set that variable directly (for example in your CI environment) instead of using `args`.
+
+| Argument | Environment variable | Required | Description | Default |
+| --- | --- | --- | --- | --- |
+| `file` | `SEMREL_PLUGIN_FILE` | Optional | Path to the Helm chart file to update. | `Chart.yaml` |
+| `update_app_version` | `SEMREL_PLUGIN_UPDATE_APP_VERSION` | Optional | When `true`, update `appVersion` to match the resolved release version. | `false` |
+| `app_version_only` | `SEMREL_PLUGIN_APP_VERSION_ONLY` | Optional | When `true`, only update `appVersion` and leave `version` unchanged. | `false` |
+| `app_version` | `SEMREL_PLUGIN_APP_VERSION` | Optional | Explicit `appVersion` value to write instead of using the release version. | unset |
+| `app_version_prefix` | `SEMREL_PLUGIN_APP_VERSION_PREFIX` | Optional | String to prepend to the computed `appVersion` value. | empty |
 
 `SEMREL_PLUGIN_APP_VERSION_ONLY` also works with `SEMREL_PLUGIN_APP_VERSION` and `SEMREL_PLUGIN_APP_VERSION_PREFIX` when you want to update only the application version field.
 
@@ -71,19 +77,21 @@ To keep `appVersion` in sync with the release version as well:
 
 ```yaml
 plugins:
-  - name: updater-helm
-    env:
-      SEMREL_PLUGIN_UPDATE_APP_VERSION: "true"
+  - uses: "@semrel/updater-helm"
+    phase: pre-tag
+    args:
+      update_app_version: "true"
 ```
 
 To prefix only `appVersion` while leaving `version` unchanged:
 
 ```yaml
 plugins:
-  - name: updater-helm
-    env:
-      SEMREL_PLUGIN_UPDATE_APP_VERSION: "true"
-      SEMREL_PLUGIN_APP_VERSION_PREFIX: "v"
+  - uses: "@semrel/updater-helm"
+    phase: pre-tag
+    args:
+      update_app_version: "true"
+      app_version_prefix: "v"
 ```
 
 With a release version of `1.2.3`, this produces:
@@ -97,10 +105,11 @@ To set a completely custom `appVersion`:
 
 ```yaml
 plugins:
-  - name: updater-helm
-    env:
-      SEMREL_PLUGIN_APP_VERSION: "2.0.0"
-      SEMREL_PLUGIN_APP_VERSION_PREFIX: "v"
+  - uses: "@semrel/updater-helm"
+    phase: pre-tag
+    args:
+      app_version: "2.0.0"
+      app_version_prefix: "v"
 ```
 
 ## License
