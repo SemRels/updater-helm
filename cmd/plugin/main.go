@@ -51,7 +51,7 @@ func run(stdout, stderr io.Writer, getenv func(string) string) int {
 		appVersion = appVersionPrefix + appVersion
 	}
 
-	if getenv("SEMREL_DRY_RUN") == "true" || getenv("SEMREL_PLUGIN_DRY_RUN") == "true" {
+	if getenv("SEMREL_DRY_RUN") == "true" || getenv("SEMREL_DRY_RUN") == "1" || getenv("SEMREL_PLUGIN_DRY_RUN") == "true" {
 		diff, err := plugin.NewUpdater().Preview(file, version, appVersion, appOnly, shouldUpdateAppVersion)
 		if err != nil {
 			_, _ = fmt.Fprintln(stderr, "updater-helm:", err)
